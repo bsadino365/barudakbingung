@@ -1,0 +1,6 @@
+const VERSI='adm-v19';
+self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSI).then(c=>c.addAll(['./','index.html','manifest.json','icon-192.png','logo.png'])));self.skipWaiting()});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!=VERSI).map(x=>caches.delete(x)))));self.clients.claim()});
+self.addEventListener('fetch',e=>{if(e.request.method!='GET'||new URL(e.request.url).origin!=location.origin)return;e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(VERSI).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request)))});
+self.addEventListener('push',e=>{let d={};try{d=e.data.json()}catch(x){}e.waitUntil(self.registration.showNotification(d.judul||'Admin bawaulin.trip',{body:d.isi||'',tag:d.tag||'adm',icon:'icon-192.png',badge:'icon-192.png',data:{url:d.url||'./'},requireInteraction:d.tingkat==='T'}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();const u=(e.notification.data&&e.notification.data.url)||'./';e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(l=>{for(const c of l){if('focus' in c){c.postMessage({buka:u});return c.focus()}}return clients.openWindow(u)}))});
